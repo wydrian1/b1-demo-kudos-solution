@@ -1,91 +1,80 @@
-# Kudos – spec-driven demó Claude Code-dal
+# Kudos – kész mintamegoldás
 
-> **Ez a kész mintamegoldás.** A gyakorlás kiinduló repója: [wydrian1/b1-demo-kudos](https://github.com/wydrian1/b1-demo-kudos).
-> Itt a teljes folyamat eredménye látható: `SPEC.md`, storyk (`HALADAS.md`), kód, unit és böngészős tesztek, `BIZONYITEK.md` és a `dokumentacio/` mappa.
+Ez a [B-1 vezetői AI-workshop](https://wydrian1.github.io/b1training/) délutáni gyakorlatának **végigvitt, elfogadott megoldása**.
+A kiinduló repóból ([wydrian1/b1-demo-kudos](https://github.com/wydrian1/b1-demo-kudos)) Claude Code-dal, **spec-driven** módon készült, a [lab guide](https://wydrian1.github.io/b1training/lab/) lépéseit követve: specifikáció → 1. kapu → storyk → bizonyíték → 2. kapu → dokumentáció.
 
-Gyakorló feladat a B-1 vezetői AI-workshop délutáni részéhez.
-Egy kis belső köszönetküldő alkalmazást, a **Kudos**-t, építünk **a saját gépen, WSL-ben**, Claude Code-dal.
-Nem „vibe coding”: előbb **specifikáció**, utána **tesztek**, és csak ezután **kód**, két emberi jóváhagyási ponttal.
+> A gyakorlathoz ne ezt a repót használd, hanem a kiinduló repót. Ez a megoldás arra való, hogy összevesd vele a saját eredményedet, vagy megmutasd, hova lehet eljutni.
 
-> Az alkalmazás csak helyben fut, kitalált adatokkal. Nincs AD, e-mail, szerver vagy deploy.
-> A repót csak **letöltöd**, a munkád a saját gépeden marad. Ide **nem kell visszacommitolni** semmit.
+![A Kudos közös fala](dokumentacio/kepek/09-fal.png)
 
-**📘 Lépésről lépésre útmutató: [Kudos lab guide](https://wydrian1.github.io/b1training/lab/)**
+## Számokban
 
-## Előfeltételek
+| | |
+|---|---|
+| Specifikáció | `SPEC.md` 1.1-es verzió: 16 üzleti szabály (SZ), 47 elfogadási kritérium (EK), 7 story |
+| Tesztek | **117 unit** és **45 böngészős (E2E)** teszt, mind zöld |
+| 1. kapu | `SPEC.md`: `Státusz: JÓVÁHAGYVA` |
+| 2. kapu | `BIZONYITEK.md`: `Elfogadás: ELFOGADVA` |
+| Dokumentáció | felhasználói útmutató 11 képernyőképpel, technikai leírás, nyomonkövethetőségi mátrix |
 
-- WSL (Ubuntu), benne `python3` (3.10 vagy újabb) és `git`
-- Claude Code, beállítva az RBI LLM gatewayre (pl. Sonnet 5.5 modellel)
+## A storyk
 
-Ellenőrzés:
+| Story | Miről szól | EK-k | MVP |
+|---|---|---|---|
+| S1 | Belépés és köszönet küldése a 3 lépéses varázslóval | EK-01…EK-07 | ✅ |
+| S2 | Küldési szabályok, érthető hibaüzenetek | EK-08…EK-13, EK-47 | ✅ |
+| S3 | Saját kapott és küldött köszönetek, keresés, szűrés | EK-14…EK-21 | ✅ |
+| S4 | Közös fal és 👏 taps | EK-22…EK-28 | ✅ |
+| S5 | Értesítések (címzett, közvetlen vezető, B-1) | EK-29…EK-35 | |
+| S6 | Vezetői nézet a szervezeti körre | EK-36…EK-41 | |
+| S7 | Vezetői statisztika | EK-42…EK-46 | |
 
-```bash
-python3 --version
-claude --version
-```
+A részletek a [`SPEC.md`](SPEC.md) 8. szakaszában, a haladás a [`HALADAS.md`](HALADAS.md)-ben van.
 
-## Indulás
+## Mit érdemes megnézni?
 
-```bash
-git clone https://github.com/wydrian1/b1-demo-kudos.git kudos
-cd kudos
-bash scripts/setup-e2e.sh
-claude
-```
+| Fájl | Miért érdekes |
+|---|---|
+| [`SPEC.md`](SPEC.md) | Hogyan lesz az üzleti leírásból ellenőrizhető specifikáció: szabályok, Adott / Amikor / Akkor kritériumok konkrét nevekkel, storyk |
+| [`BIZONYITEK.md`](BIZONYITEK.md) | A 2. kapu alapja: melyik kritériumot melyik teszt igazolja, böngészős tesztek storynként, kézi ellenőrző forgatókönyv |
+| [`dokumentacio/`](dokumentacio/) | Az elfogadott változat dokumentációja, a tényleges kódból: [felhasználói útmutató](dokumentacio/felhasznaloi-utmutato.md), [technikai leírás](dokumentacio/technikai-leiras.md), [nyomonkövethetőség](dokumentacio/nyomonkovethetoseg.md) |
+| [`tests/`](tests/), [`tests/e2e/`](tests/e2e/) | Unit és böngészős (Playwright) tesztek storynként, EK-hivatkozással a nevükben |
+| [`kudos/`](kudos/), [`static/`](static/), [`app.py`](app.py) | A megvalósítás: Python standard library, SQLite, vanilla HTML/CSS/JS, külső csomag nélkül |
+| [`CLAUDE.md`](CLAUDE.md), [`.claude/skills/`](.claude/skills/) | A szabályok és a skillek (`/spec`, `/build`, `/verify`, `/docs`), amelyekkel a megoldás készült |
 
-A `setup-e2e.sh` egyszer kell: egy helyi `.venv`-be telepíti a böngészős tesztekhez a Playwrightot és a Chromiumot (internet és `sudo` kell hozzá, pár perc). Az alkalmazás kódja ettől függetlenül csak a Python standard libraryt használja.
+## Futtatás
 
-Az első üzenet Claude-nak:
-
-```text
-/spec
-```
-
-Claude elolvassa az üzleti leírást (`docs/uzleti-leiras.md`), feltesz néhány tisztázó kérdést, és megírja a `SPEC.md`-t. **Kódot még nem ír.**
-
-## A folyamat
-
-| Lépés | Ki | Mi történik |
-|---|---|---|
-| 1. Specifikáció | Claude (`/spec`) | `SPEC.md` készül, státusz: `TERVEZET` |
-| 2. **🟡 1. kapu** | **Te** | Átnézed a specet. Ha jó, **te magad** írod át a státuszt `JÓVÁHAGYVA`-ra |
-| 3. Storyk | Claude (`/build S1`, `/build S2`, …) | Storynként: előbb a story tesztjei (pirosak), aztán az építés, amíg minden zöld. Minden story után megáll, és megmondja, mit nézz meg a böngészőben |
-| 4. Bizonyíték | Claude (`/verify`) | `BIZONYITEK.md`: melyik kritériumot melyik teszt igazolja, mi az eredmény |
-| 5. **🟡 2. kapu** | **Te** | Elolvasod a bizonyítékot, végigkattintod a kézi ellenőrzést (lab guide 2. kapu), és elfogadod vagy visszadobod. Ha elfogadod, **te magad** írod át a `BIZONYITEK.md`-ben az `Elfogadás` sort `ELFOGADVA`-ra |
-| 6. Dokumentáció | Claude (`/docs`) | Az elfogadott változatról: felhasználói útmutató képernyőképekkel, technikai leírás, nyomonkövethetőségi mátrix a `dokumentacio/` mappába |
-
-## Futtatás (ha már elkészült)
+WSL-ben (Ubuntu), Python 3.10 vagy újabb:
 
 ```bash
+git clone https://github.com/wydrian1/b1-demo-kudos-solution.git kudos-megoldas
+cd kudos-megoldas
 python3 app.py
 ```
 
-Majd a böngészőben: http://localhost:8000
+Majd a böngészőben: http://localhost:8000. A belépés DEMO: a listából választod ki, kinek a nevében lépsz be.
 
-Tesztek:
+## Tesztek
 
 ```bash
 python3 -m unittest discover -s tests -v
+```
+
+A böngészős tesztekhez egyszer telepíteni kell a Playwrightot és a Chromiumot (internet és `sudo` kell hozzá):
+
+```bash
+bash scripts/setup-e2e.sh
 .venv/bin/python -m unittest discover -s tests/e2e -v
 ```
 
-A második sor a böngészős (E2E) teszteket futtatja. Látható böngészőablakban:
+Látható böngészőablakban (Windows 11-en a WSLg külön ablakot nyit):
 
 ```bash
 HEADED=1 .venv/bin/python -m unittest discover -s tests/e2e -v
 ```
 
-## Mi van a repóban?
+## Tudnivalók
 
-| Fájl | Szerep |
-|---|---|
-| `CLAUDE.md` | Szabályok az ágensnek (technológia, folyamat, tilalmak) |
-| `docs/uzleti-leiras.md` | Az egyszerűsített üzleti igény, **ebből** indul minden |
-| `docs/arculat-ui.md` | A felület kötelező útmutatója: színek, komponensek, elrendezés |
-| `templates/SPEC-sablon.md` | A specifikáció kötelező szerkezete |
-| `scripts/setup-e2e.sh` | A böngészős tesztek eszközeinek telepítése (Playwright + Chromium) |
-| `data/munkatarsak.json` | Kitalált munkatársak és szervezeti hierarchia (az AD helyett) |
-| `.claude/skills/spec/` | `/spec`: specifikáció írása vagy módosítása |
-| `.claude/skills/build/` | `/build S1`: egy story tesztjei és építése, utána megállás |
-| `.claude/skills/verify/` | `/verify`: tesztek futtatása és bizonyíték-összefoglaló |
-| `.claude/skills/docs/` | `/docs`: dokumentáció az elfogadott változatról |
+- **Minden adat kitalált.** A munkatársak a `data/munkatarsak.json`-ban vannak (`@pelda.local` címekkel), ez helyettesíti az AD-t. Valós személyekhez nincs közük.
+- **Csak helyben fut**, demó célra: nincs valódi bejelentkezés, e-mail- vagy Teams-értesítés, és nincs szerveres üzemeltetés. A szándékosan kihagyott részek a `SPEC.md` „Kimarad” szakaszában vannak.
+- A hivatalos Raiffeisen-logót a felület nem használja, csak a színeket (`docs/arculat-ui.md`).
