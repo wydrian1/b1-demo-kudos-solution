@@ -1,5 +1,8 @@
 # Kudos – spec-driven demó Claude Code-dal
 
+> **Ez a kész mintamegoldás.** A gyakorlás kiinduló repója: [wydrian1/b1-demo-kudos](https://github.com/wydrian1/b1-demo-kudos).
+> Itt a teljes folyamat eredménye látható: `SPEC.md`, storyk (`HALADAS.md`), kód, unit és böngészős tesztek, `BIZONYITEK.md` és a `dokumentacio/` mappa.
+
 Gyakorló feladat a B-1 vezetői AI-workshop délutáni részéhez.
 Egy kis belső köszönetküldő alkalmazást, a **Kudos**-t, építünk **a saját gépen, WSL-ben**, Claude Code-dal.
 Nem „vibe coding”: előbb **specifikáció**, utána **tesztek**, és csak ezután **kód**, két emberi jóváhagyási ponttal.
